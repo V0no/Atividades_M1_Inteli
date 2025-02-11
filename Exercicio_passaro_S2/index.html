@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <title>Exercício do Pássaro</title>
+    <title>Samuel Vono - Pássaro Claudio</title>
     <style>
         body {
             display: flex;
@@ -18,22 +18,22 @@
 <body>
 
 <script>
-    //Configuração do site
+    // Configuração do site
     var config = {
-            type: Phaser.AUTO,
-            width: 800,
-            height: 600,
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
 
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
-        };
-
+    // Criando a instância do jogo no Phaser
     var game = new Phaser.Game(config);
     
-    //Nome do pássaro
+    // Nome do pássaro
     var claudio;
 
     // Função que terá o intuito de carregar os arquivos para a memória
@@ -45,9 +45,9 @@
     // Função de criar a imagem dentro do site, definindo a imagem que será utilizada e sua escala
     function create() {
         this.add.image(400, 300, 'bg').setScale(1.2);
-        claudio = this.add.sprite(100, 300, 'passaro').setScale(1.3);
+        claudio = this.add.sprite(100, 100, 'passaro').setScale(1.3);
 
-        //Definindo a animação do passarinho
+        // Definindo a animação do passarinho
         this.anims.create({
             key: 'fly',
             frames: this.anims.generateFrameNumbers('passaro', {start: 0, end: 7}), 
@@ -55,22 +55,24 @@
             repeat: -1
         });
 
-       
         claudio.anims.play('fly', true);
     }
-        //Esta função tem o o objetivo de ficar atualizando sempre o site caso haja alguma "alteração", como por exemplo se o usuário tivesse mexendo o mouse na tela
-        function update() { 
-        if (claudio.x < 700 && claudio.y === 100) {
-            claudio.x += 5; // Move para a direita
-        } 
-        else if (claudio.x === 700 && claudio.y < 400) {
-            claudio.y += 5; // Move para baixo
-        } 
-        else if (claudio.x > 100 && claudio.y === 400) {
-            claudio.x -= 5; // Move para a esquerda
-        } 
-        else if (claudio.x === 100 && claudio.y > 100) {
-            claudio.y -= 5; // Move para cima
+
+    // Função de atualização
+    function update() { 
+        for (let i = 0; i < 3; i++) {  
+            if (claudio.x < 700 && claudio.y === 100) {
+                claudio.x += 1; // Move para a direita 
+            } 
+            else if (claudio.x === 700 && claudio.y < 400) {
+                claudio.y += 1; // Move para baixo
+            } 
+            else if (claudio.x > 100 && claudio.y === 400) {
+                claudio.x -= 1; // Move para a esquerda
+            } 
+            else if (claudio.x === 100 && claudio.y > 100) {
+                claudio.y -= 1; // Move para cima
+            }
         }
     }
 
@@ -78,5 +80,3 @@
 
 </body>
 </html>
-
-
