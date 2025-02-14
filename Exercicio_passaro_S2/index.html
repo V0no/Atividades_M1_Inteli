@@ -62,12 +62,14 @@
     function update() { 
         for (let i = 0; i < 3; i++) {  
             if (claudio.x < 700 && claudio.y === 100) {
+                claudio.setFlip(false, false);
                 claudio.x += 1; // Move para a direita 
             } 
             else if (claudio.x === 700 && claudio.y < 400) {
                 claudio.y += 1; // Move para baixo
             } 
             else if (claudio.x > 100 && claudio.y === 400) {
+                claudio.setFlip(true, false);
                 claudio.x -= 1; // Move para a esquerda
             } 
             else if (claudio.x === 100 && claudio.y > 100) {
