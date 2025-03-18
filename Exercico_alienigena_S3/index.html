@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Definição das dimensões do jogo
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // Configuração do jogo Phaser
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+            // Adiciona a física do jogo
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 300 },
+                    debug: true // Mostra hitboxes e colisões na tela
+                }
+            },
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // Iniciação do jogo Phaser
+        const game = new Phaser.Game(config);
+
+        // Variáveis do jogo
+        var clerito; // Alien
+        var teclado; // Movimentação com o teclado
+        var fogo; // Fogo da nave do Clerito
+        var plataforma; // Plataforma
+        var moedasLista = []; // Lista de moedas
+        var numMoedas = 2; // Número de moedas no jogo
+        var pontuacao = 0; // Pontuação inicial
+        var placar; // Placar que exibe a pontuação
+        var psyduck; // Psyduck
+
+        // Função para ativar e desativar o turbo do personagem
+        function ativarTurbo() {
+            fogo.setVisible(true);
+        }
+
+        function semTurbo() {
+            fogo.setVisible(false);
+        }
+
+        // Carregamento das imagens utilizadas
+        function preload() {
+            this.load.image('background', 'assets/bg.png'); // Fundo
+            this.load.image('clerito', 'assets/alienigena.png'); // Alien
+            this.load.image('turbo_nave', 'assets/turbo.png'); // Fogo da nave
+            this.load.image('plataformaTijolo', 'assets/tijolos.png'); // Plataforma
+            this.load.image('moedas', 'assets/moeda.png'); // Moeda
+            this.load.image('psyduck', 'assets/psyduck.png'); // Psyduck
+        }
+
+        function create() {
+            // Insere o fundo do jogo
+            this.add.image(larguraJogo / 2, alturaJogo / 2, 'background');
+
+            // Cria o fogo do turbo (começa invisível)
+            fogo = this.add.sprite(0, 0, 'turbo_nave');
+            fogo.setVisible(false);
+
+            // Adiciona a física ao personagem e define colisão com as bordas
+            clerito = this.physics.add.sprite(larguraJogo / 2, 0, 'clerito');
+            clerito.setCollideWorldBounds(true);
+
+            // Configura as teclas de controle para o jogador
+            teclado = this.input.keyboard.createCursorKeys();
+
+            // Cria a plataforma estática e adiciona colisão com o personagem
+            plataforma = this.physics.add.staticImage(larguraJogo / 2, alturaJogo / 2, 'plataformaTijolo');
+            this.physics.add.collider(clerito, plataforma);
+
+            // Definindo as coordenadas e a escala do psyduck
+            psyduck = this.physics.add.sprite(200, 500, 'psyduck').setScale(0.1);
+
+            // Definindo a hitbox do Psyduck 
+            psyduck.body.setSize(500, 500); // Tamanho da hitbox
+
+            // Configurações físicas do Psyduck
+            psyduck.body.setImmovable(true); // Impede que ele se mova
+            psyduck.body.setAllowGravity(false); // Desativa a gravidade
+
+            // Adiciona a colisão entre Clerito e Psyduck
+            this.physics.add.collider(clerito, psyduck);
+
+            // Criando múltiplas moedas e adicionando na lista
+            for (var i = 0; i < numMoedas; i++) {
+                var moeda = this.physics.add.sprite(
+                    Phaser.Math.RND.between(50, larguraJogo - 50), // Posição X aleatória
+                    Phaser.Math.RND.between(50, alturaJogo / 2),   // Posição Y aleatória
+                    'moedas'
+                );
+                
+                //Colisão entre a moeda e a borda do game
+                moeda.setCollideWorldBounds(true);
+                //Quicar da moeda
+                moeda.setBounce(0.7);
+                //Colisão entre a moeda com a plataforma
+                this.physics.add.collider(moeda, plataforma);
+
+                // Adiciona a moeda na lista
+                moedasLista.push(moeda);
+
+                // Adiciona a detecção de colisão entre cada moeda e o personagem
+                this.physics.add.overlap(clerito, moeda, coletarMoeda, null, this);
+
+                // Colisão entre a moeda e o psyduck
+                this.physics.add.collider(moeda, psyduck);
+            }
+
+            // Criando um placar para exibir a pontuação com base nas moedas coletadas
+            placar = this.add.text(50, 50, 'Moedas: ' + pontuacao, { fontSize: '45px', fill: '#495613' });
+        }
+
+        // Função chamada ao coletar uma moeda
+        function coletarMoeda(clerito, moeda) {
+            moeda.setVisible(false);
+
+            // Define uma nova posição aleatória para a moeda reaparecer
+            moeda.setPosition(
+                Phaser.Math.RND.between(50, larguraJogo - 50),
+                Phaser.Math.RND.between(50, alturaJogo / 2)
+            );
+
+            pontuacao += 1; // Atualiza a pontuação
+            placar.setText('Moedas: ' + pontuacao); // Atualiza o placar na tela
+
+            moeda.setVisible(true);
+        }
+
+        function update() {
+            // MOVIMENTO HORIZONTAL
+
+            // Movimento para a esquerda
+            if (teclado.left.isDown) {
+                clerito.setVelocityX(-150);
+            }
+            // Movimento para a direita
+            else if (teclado.right.isDown) {
+                clerito.setVelocityX(150);
+            }
+            // Sem movimento
+            else {
+                clerito.setVelocityX(0);
+            }
+
+            // MOVIMENTO VERTICAL
+
+            // Movimento para cima
+            if (teclado.up.isDown) {
+                clerito.setVelocityY(-150);
+                ativarTurbo();
+            }
+            // Caso nenhuma tecla seja pressionada, aplica gravidade e desativa o turbo
+            else {
+                semTurbo();
+            }
+
+            // Atualiza a posição do efeito de turbo para acompanhar Clerito
+            fogo.setPosition(clerito.x, clerito.y + clerito.height / 2);
+        }
+    </script>
+</body>
+</html>
